@@ -4,7 +4,13 @@ import { getUserFromCookie } from "@/lib/getUser";
 import {redirect} from "next/navigation";
 import {ObjectId} from "mongodb";
 import {getCollection} from "@/lib/db";
+import { v2 as cloudinary } from "cloudinary";
 
+const cloudinaryConfig = cloudinary.config({
+    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 function AlphaNumericWithBasics (text) {
     const regex = /^[a-zA-Z0-9 .,]*$/
@@ -72,6 +78,12 @@ async function memeLogic(formData, user) {
     if (ourMeme.line3.length === 0) {
         errors.line3 = 'Line 3 is required'
     }
+
+    const expectedSignature = cloudinary.utils.api_sign_request({public_id: formData.get('public_id'), version: formData.get('version') }, cloudinaryConfig.api_secret);
+    if (expectedSignature === formData.get('signature')) {
+        ourMeme.photo = formData.get('public_id')
+    }
+
     return {
         errors,
         ourMeme
@@ -95,5 +107,49 @@ export async function createMeme(prevState, formData) {
     // save to database
     const memeCollection = await getCollection('memes')
     const meme = await memeCollection.insertOne(results.ourMeme)
+    return redirect('/')
+}
+
+export async function editMeme(prevState, formData) {
+    console.log(formData)
+    const user = await getUserFromCookie()
+    if (!user) {
+        redirect('/')
+    }
+
+    const results = await memeLogic(formData, user)
+
+    if (results.errors.line1 || results.errors.line2 || results.errors.line3) {
+        return {errors: results.errors}
+    }
+
+    // save to database
+    const memeCollection = await getCollection('memes')
+    let memeId = formData.get('memeId')
+    if (typeof memeId != 'string') memeId = ''
+    // author is the creator
+    const pendingMeme = await memeCollection.findOne({_id: ObjectId.createFromHexString(memeId)})
+    if (pendingMeme.author.toString() !== user.user_id){
+        return redirect('/')
+    }
+    await memeCollection.findOneAndUpdate({_id: ObjectId.createFromHexString(memeId)}, {$set: results.ourMeme})
+    return redirect('/')
+}
+
+export async function deleteMeme(formData) {
+    const user = await getUserFromCookie()
+    if (!user) {
+        redirect('/')
+    }
+    const memeCollection = await getCollection('memes')
+    let memeId = formData.get('id')
+    if (typeof memeId != 'string') memeId = ''
+    // author is the creator
+    const pendingMeme = await memeCollection.findOne({_id: ObjectId.createFromHexString(memeId)})
+    if (pendingMeme.author.toString() !== user.user_id){
+        return redirect('/')
+    }
+
+    await memeCollection.deleteOne({_id: ObjectId.createFromHexString(memeId)})
     return redirect('/')
 }

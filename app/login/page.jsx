@@ -6,7 +6,7 @@ export default function Login() {
   return (
     <>
       <div className="space-y-10">
-        <p className="text-center">You need log in!</p>
+        <p className="text-center font-bold uppercase text-lg">You need log in!</p>
         <form action={formAction} className="max-w-xl mx-auto space-y-4">
           <label className="input input-bordered flex items-center gap-2">
             <svg
@@ -25,7 +25,7 @@ export default function Login() {
               name="username"
             />
           </label>
-          {formState.errors?.username && (
+          {formState.success === false && (
             <div role="alert" className="alert alert-warning">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -40,7 +40,7 @@ export default function Login() {
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                 />
               </svg>
-              <span>{formState.errors?.username}</span>
+              <span>{formState.error}</span>
             </div>
           )}
           <label className="input input-bordered flex items-center gap-2">
@@ -64,24 +64,6 @@ export default function Login() {
               name="password"
             />
           </label>
-          {formState.errors?.password && (
-            <div role="alert" className="alert alert-warning">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 shrink-0 stroke-current"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
-              <span>{formState.errors?.password}</span>
-            </div>
-          )}
           <button className="btn btn-primary">Login</button>
         </form>
       </div>

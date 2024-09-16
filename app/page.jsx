@@ -12,9 +12,9 @@ export default async function Home() {
       )}
       {!user && (
         <>
-          <p className="text-center">
+          <p className="text-center font-bold uppercase text-lg">
             Don&rsquo;t have an account?{" "}
-            <strong className="underline underline-offset-4">Create one</strong>{" "}
+            <span className="underline underline-offset-4">Create one</span>{" "}
           </p>
           <RegisterForm />
         </>

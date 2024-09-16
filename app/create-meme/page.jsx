@@ -11,8 +11,8 @@ export default async function Page() {
     return (
         <>
             <div className="space-y-10">
-                <p className="text-center">Create a Meme!</p>
-                <MemeForm />
+                <p className="text-center font-bold uppercase text-lg">Create a Meme!</p>
+                <MemeForm action={'create'} />
             </div>
         </>
     );
